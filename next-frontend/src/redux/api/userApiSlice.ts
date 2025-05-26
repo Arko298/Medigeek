@@ -1,0 +1,100 @@
+import { apiSlice } from "./apiSlice.ts";
+import { USERS_URL } from "@/constants.ts";
+
+export const userApiSlice=apiSlice.injectEndpoints({
+    endpoints:(builder)=>({
+        registerUser:builder.mutation({
+            query:(userData)=>({
+                url:`${USERS_URL}/register`,
+                method:"POST",
+                body:userData
+            }),
+        }),
+        loginUser:builder.mutation({
+            query:(data)=>({
+                url:`${USERS_URL}/login`,
+                method:"POST",
+                body:data
+            })
+        }),
+        logoutUser:builder.mutation({
+            query:()=>({
+                url:`${USERS_URL}/logout`,
+                method:"POST"
+            }),
+        }),
+        updateProfile:builder.mutation({
+            query:(userData)=>({
+                url:`${USERS_URL}/profile`,
+                method:"PUT",
+                body:userData
+            }),
+            invalidatesTags:["User"]
+        }),
+        getProfile:builder.query({
+            query:()=>({
+                url:`${USERS_URL}/profile`,
+                method:"GET",
+            }),
+            providesTags:["User"]
+        }),
+        getAllUsers:builder.query({
+            query:()=>({
+                url:`${USERS_URL}`,
+                method:"GET",
+            }),
+            providesTags:["User"]
+        }),
+        getFollowers:builder.query({
+            query:()=>({
+                url:`${USERS_URL}/followers`,
+                method:"GET",
+            }),
+            providesTags:["User"]
+        }),
+        getFollowings:builder.query({
+            query:()=>({
+                url:`${USERS_URL}/followings`,
+                method:"GET",
+            }),
+            providesTags:["User"]
+        }),
+        followUser:builder.mutation({
+            query:(userId)=>({
+                url:`${USERS_URL}/follow/${userId}`,
+                method:"POST",
+            }),
+            invalidatesTags:["User"]
+        }),
+        unfollowUser:builder.mutation({
+            query:(userId)=>({
+                url:`${USERS_URL}/unfollow/${userId}`,
+                method:"POST",
+            }),
+            invalidatesTags:["User"]
+        }),
+        acceptFriendRequest:builder.mutation({
+            query:(userId)=>({
+                url:`${USERS_URL}/friend-request/accept`,
+                method:"POST",
+                body:{userId}
+            }),
+            invalidatesTags:["User"]
+        }),
+    }),
+});
+
+export const {
+    useRegisterUserMutation,
+    useLoginUserMutation,
+    useLogoutUserMutation,
+    useUpdateProfileMutation,
+    useGetProfileQuery,
+    useGetAllUsersQuery,
+    useGetFollowersQuery,
+    useGetFollowingsQuery,
+    useFollowUserMutation,
+    useUnfollowUserMutation,
+    useAcceptFriendRequestMutation
+    
+}=userApiSlice

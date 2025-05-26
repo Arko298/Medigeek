@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useRole } from "./RoleContext";
 import Image from "next/image";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useLoginUserMutation } from "@/redux/api/userApiSlice";
+import { setCredentials } from "@/redux/features/auth/authSlice";
+import { toast } from "react-toastify";
 
 interface FormData {
   email: string;
@@ -12,27 +17,50 @@ interface FormData {
 }
 
 const Login = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const { setRole } = useRole(); // Get setRole from RoleContext
-  const router = useRouter();
+ const dispatch=useDispatch();
+ const router=useRouter();
+ const [login,{isLoading}]= useLoginUserMutation();
+ 
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>();
-
-  const onSubmit = handleSubmit(({ email, password, remember }) => {
-    if (isAdmin) {
-      console.log("Admin Login:", email, password, remember);
-      setRole("admin"); // Set the role as admin
-      router.push("/AdminDashboard"); // Redirect to Admin Dashboard
-    } else {
-      console.log("User Login:", email, password, remember);
-      setRole("user"); // Set the role as user
-      router.push("/home"); // Redirect to Home
-    }
+  } = useForm<FormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false,
+    },
   });
+
+  const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
+    try {
+      const userData=await login({
+        email: data.email,
+        password: data.password,
+      }).unwrap();
+      
+      console.log(userData);
+
+      const credentials={
+        _id: userData._id,
+        fullName: userData.fullName,
+        email: userData.email,
+        isAdmin: userData.isAdmin,
+      }
+      dispatch(setCredentials(credentials));
+      if (data.remember){
+        localStorage.setItem("rememberMe","true");
+      }else{
+        localStorage.removeItem("rememberMe");
+      }
+      toast.success("Login successful!!");
+      router.push("/home");
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials");
+    }
+  }
   return (
     <div>
       {/* Logo at the top */}
@@ -45,7 +73,7 @@ const Login = () => {
       <div className="max-w-md w-full bg-blured p-8 border border-black rounded shadow-lg">
         <div className="text-left font-medium text-xl mb-6">Login</div>
 
-        <form className="space-y-6" onSubmit={onSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label htmlFor="email" className="text-sm font-bold text-black">
               Email Address
@@ -110,19 +138,7 @@ const Login = () => {
             </a>
           </div>
 
-          {/* Admin Login Toggle */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isAdmin"
-              checked={isAdmin}
-              onChange={() => setIsAdmin(!isAdmin)}
-              className="h-4 w-4 rounded text-blue-300"
-            />
-            <label htmlFor="isAdmin" className="ml-2 text-sm text-gray-600">
-              Login as Admin
-            </label>
-          </div>
+  
 
           {/* Submit Button */}
           <button

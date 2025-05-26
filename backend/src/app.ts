@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import cors from "cors";
 import bodyParser from 'body-parser';
 import healthCheck from './controllers/healthcheck.controllers';
-import authRouter from './routes/auth.routes';
+import cookieParser from "cookie-parser";
+
 
 const app:Express = express();
 
@@ -13,20 +14,26 @@ app.use(cors(
     {
         origin: process.env.CORS_ORIGIN,
         credentials: true,
-        methods:['GET','POST','PUT','PATCH','DELETE']
+       
     }
 ));
 
 //middlewares
-app.use(express.json({limit: '50mb'}));
+app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cookieParser());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+
+//import of routes
+import userRoutes from "./routes/user.routes.ts"
+import postRoutes from "./routes/post.routes.ts"
 //routes
-app.route('/api/healthcheck');
-app.use('api/auth',authRouter)
+// app.route('/api/healthcheck');
+app.use('/api/users',userRoutes)
+app.use('/api/posts',postRoutes)
 
 
 

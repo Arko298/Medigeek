@@ -1,28 +1,40 @@
-import  jwt  from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
-import ApiError from "../config/ApiError";
-import User from "../models/user.models";
-interface CustomRequest extends Request {
-    user?: any; // Make 'user' optional 
-  }
-export const authenticateUser : any= async (req: CustomRequest, res: Response, next: NextFunction) => {
-    
-    //get the token from the header
-    const token = req.header("Authorization")?.replace("Bearer ", "") || req.cookies.token;
-    if (!token) {
-        return res.status(401).json(new ApiError(401, "Unauthorized"));
-    }
+import jwt from "jsonwebtoken";
+import User from "../models/user.models.ts";
+import asyncHandler from "../config/asynchandler.ts";
 
-    //verify the token
+
+const authenticateToken = asyncHandler(async (req: any, res: any, next: any) => {
+  let token = req.cookies.jwt;
+
+  if (token) {
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-        const user:any = await User.findById((decoded as any).id).select("-password -refreshToken");
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-            req.user = user;
-            next();
-        }
-    }catch(error){
-        return res.status(401).json(new ApiError(401,"User not authorized"));
+      // Validate JWT_SECRET
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        res.status(500);
+        throw new Error("Server error: JWT_SECRET is not configured");
+      }
+
+      // Verify token with proper typing
+      const decoded = jwt.verify(token, secret as string) as { userId: string };
+      req.user = await User.findById(decoded.userId).select("-password");
+      next();
+    } catch (error) {
+      res.status(401);
+      throw new Error("Not Authorized, Token failed");
     }
-}
+  } else {
+    res.status(401);
+    throw new Error("Not Authorized, Token not found");
+  }
+});
+
+const authorizeAdmin = (req: any, res: any, next: any) => {
+  if (req.user && req.user.isAdmin) {
+    next();
+  } else {
+    res.status(401).send("Not an admin");
+  }
+};
+
+export { authenticateToken, authorizeAdmin };

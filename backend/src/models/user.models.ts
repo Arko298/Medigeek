@@ -1,51 +1,66 @@
-import mongoose,{Schema,Document} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-export interface IUser extends Document{
-    id:Number,
-    userName:string,
-    email:string,
-    collegeName:string,
-    fullName?:string,
-    password?:any,
-    avatar: string,
-    refreshToken:string,
-    createdAt : Date,
-    updatedAt : Date,
-    role? : string,
-    isActive : boolean,//if user delete account then not active otherwise active to be shown in admin portal
-}
+const userSchema = new Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+    },
+    userName: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    collegeName: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    bio: {
+      type: String,
+      default: null,
+    },
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    followings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // From sendFriendRequest
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    BlockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    profilePicture: {
+      type: String,
+      default: null,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true,
+   
+   },
+);
 
-const userSchema : Schema<IUser> =new Schema({
-    userName:{
-        type:String,
-        required:true
-    },
-    email:{
-        type:String,
-    },
-    fullName:{
-        type:String,
-        trim:true,
-        index:true
-    },
-    password:{
-        type:String,
-        required:[true,"Password is required"]
-    },
-    refreshToken:{
-        type : String
-    },
-    isActive:{
-        type:Boolean,
-        default:true
-    },
-    avatar:{
-        type : String,
-    }
-
-
-},
-{timestamps:true})
-
-const User=mongoose.model<IUser>("User",userSchema)
+const User = mongoose.model("User", userSchema);
 export default User;
