@@ -1,60 +1,75 @@
-// Import mongoose and define the schema for the Post model
-import mongoose, { Schema,Document } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface IComment {
+  user: mongoose.Schema.Types.ObjectId;
+  text: string;
+  createdAt: Date;
+}
 
 export interface IPost extends Document {
-    title: string;
-    content: string;
-    image?: string; // URL of the uploaded image
-    author: mongoose.Schema.Types.ObjectId; // Ref to User model
-    likes: mongoose.Schema.Types.ObjectId[]; // Users who liked the post
-    comments: {
-      user: mongoose.Schema.Types.ObjectId; // Ref to User model
-      text: string;
-      createdAt: Date;
-    }[];
-    createdAt: Date;
-    updatedAt: Date;
-  }
+  title: string;
+  description: string;
+  content: string;
+  image: string;
+  author: mongoose.Schema.Types.ObjectId;
+  likes: mongoose.Schema.Types.ObjectId[];
+  comments: IComment[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const postSchema: Schema = new Schema({
-    title: {
-        type: String,
-        required: true,
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 100
+  },
+  description: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  image: {
+    type: String,
+    required: true
+  },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  likes: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    default: []
+  }],
+  comments: [{
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
     },
-    content:{
-        type: String
+    text: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 500
     },
-    author:{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    image:{
-        type: String
-    },
-    tags:{
-        type: [String]
-    },
-    likes:[{
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        default: 0
-    }],
-    comments:[{
-        user:{
-            type: Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        text:{
-            type: String
-        },
-        createdAt:{
-            type: Date,
-            default: Date.now
-        }
-    }]
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
+}, { timestamps: true });
 
-
-},
-{timestamps:true})
+// Add text index for search functionality
+postSchema.index({ title: 'text', description: 'text', content: 'text' });
 
 const Post = mongoose.model<IPost>("Post", postSchema);
 export default Post;

@@ -1,1 +1,1 @@
-export const DB_Name="social";
+export const DB_Name="medigeek";

@@ -1,265 +1,404 @@
-import User from "../models/user.models";
-import ApiError from "../config/ApiError";
-import ApiResponse from "../config/ApiResponse";
-import { Request, Response } from "express";
+import User from "../models/user.models.ts";
+import ApiError from "../config/ApiError.ts";
+import ApiResponse from "../config/ApiResponse.ts";
+import asyncHandler from "../config/asynchandler.ts";
 import bcrypt from "bcrypt";
+import createToken from "../config/createToken.ts";
 
-interface CustomRequest extends Request {
-    user?: { id: string };
-}
+// Avatar part should be done. It is currently not done.
 
+const registerUser = asyncHandler(async (req: any, res: any) => {
+  const { fullName, email, userName, password, collegeName } = req.body;
 
-export const registerUser=async(req: Request,res: Response)=>{
-    const {fullName ,collegeName, email, password }=req.body;
-    try {
-        const hashedPassword=await bcrypt.hash(password,10);
-        const newUser =await User.create({
-            fullName,
-            collegeName,
-            email,
-            password:hashedPassword
-        })
-        res.status(201).json(new ApiResponse(201,"User created successfully", newUser))//remove the string and make sure to return the newUser.
-    } catch (error) {
-        res.status(400).json()
+  if (!fullName || !email || !userName || !password || !collegeName) {
+    throw new ApiError(400, "Please fill all the fields");
+  }
+  const userExists = await User.findOne({
+    $or: [{ email }, { userName }],
+  });
+  if (userExists) {
+    throw new ApiError(400, "User already exists");
+  }
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const user = await User.create({
+    fullName,
+    email,
+    userName,
+    password: hashedPassword,
+    collegeName,
+  });
+
+  try {
+    await user.save();
+    createToken(res, user._id);
+    res.status(201).json(
+      new ApiResponse(201, "User created successfully", {
+        _id: user._id,
+        fullName: user.fullName,
+        userName: user.userName,
+        email: user.email,
+        collegeName: user.collegeName,
+        bio: user.bio,
+        isAdmin: user.isAdmin,
+      }),
+    );
+  } catch (error) {
+    throw new ApiError(500, "Failed to create user");
+  }
+});
+
+const loginUser = asyncHandler(async (req: any, res: any) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new ApiError(400, "Please fill all the fields");
+  }
+  const user = await User.findOne({ email });
+  if (user) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(400).json("Invalid credentials");
+    } else {
+      createToken(res, user._id);
+      res.status(200).json({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        collegeName: user.collegeName,
+        bio: user.bio,
+        isAdmin: user.isAdmin,
+      });
     }
+  }
+});
+const logoutUser = async (req: any, res: any) => {
+  res.cookie("jwt", " ", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json("Logged out successfully");
+};
 
-}
-//settings page 
-export const updateAvatar=  (async(req: any, res:any)=>{
-    try {
-        const {avatar}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        user.avatar=avatar;
-        await user.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Avatar updated successfully", user))
-    } catch (error) {
-        res.status(400).json(new ApiError(400,"Failed to update avatar"))
-    }
+const getProfileOfCurrentUser = asyncHandler(async (req: any, res: any) => {
+  const user = await User.findById(req.user._id);
 
-
-})
-export const logoutUser=async(req:Request, res:Response)=>{}
-export const updateEmail=async(req:any, res:any)=>{
-    try {
-        const {email}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        user.email=email;
-        await user.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Email updated successfully", user))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to update email"))
-    }
-}
-export const changePassword=async(req:CustomRequest, res:Response)=>{}
-export const deleteUser=async(req:any, res:any)=>{
-    try {
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        await user.deleteOne();
-        res.status(200).json(new ApiResponse(200,"User deleted successfully", null))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to delete user"))
-    }
-}
+  if (user) {
+    res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      userName: user.userName,
+      email: user.email,
+      bio: user.bio,
+      collegeName: user.collegeName,
+    });
+  } else {
+    res.status(404).json("User not found");
+  }
+});
 
 //profile pages
-export const updateProfile=async(req: CustomRequest, res:Response)=>{
-    try {
-        const {fullName,collegeName}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        user.fullName=fullName;
-        user.collegeName=collegeName;
-        await user.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Profile updated successfully", user))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to update profile"))
-    }
+const updateProfile = asyncHandler(async (req: any, res: any) => {
+  const user = await User.findById(req.user._id);
 
+  if (user) {
+    user.fullName = req.body.fullName || user.fullName;
+    user.email = req.body.email || user.email;
+    user.bio = req.body.bio;
+    user.userName = req.body.userName || user.userName;
 
-}
-export const getFollowers= async(req: any, res:any)=>{
-    try {
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const followers= await User.find({followers:user.id});
-        res.status(200).json(new ApiResponse(200,"Followers fetched successfully", followers))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to fetch followers"))
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      user.password = hashedPassword;
     }
-}
-export const getFollowings= async(req: any, res:any)=>{
-    try {
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const followings= await User.find({following:user.id});
-        res.status(200).json(new ApiResponse(200,"Followings fetched successfully", followings))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to fetch followings"))
+    const updatedUser = await user.save();
+    res.status(200).json({
+      _id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      userName: updatedUser.userName,
+      email: updatedUser.email,
+      collegeName: updatedUser.collegeName,
+      bio: updatedUser.bio,
+    });
+  } else {
+    res.status(400).json("Failed to update profile");
+  }
+});
+const getFollowings = asyncHandler(async (req: any, res: any) => {
+  // the person whom i am following.
+  const user = await User.findById(req.user._id);
+  if (user) {
+    const followers = await User.find({ followers: user.id });
+    res.status(200).json({
+      count: followers.length,
+      message: "The person you follows fetched successfully",
+      followers: followers,
+    });
+  } else {
+    res.status(500).json("Failed to fetch followers");
+  }
+});
+const getFollowers = asyncHandler(async (req: any, res: any) => {
+  // the person who is  following me.
+  try {
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
     }
-}
+    const user: any = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const following = await User.find({ followings: user.id });
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Followers fetched successfully", following));
+  } catch (error) {
+    res.status(400).json(new ApiError(400, "Failed to fetch followers"));
+  }
+});
+
+const seeProfileOfAnotherUser = asyncHandler(async (req: any, res: any) => {
+  const { userId } = req.params;
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json(new ApiError(404, "User not found"));
+  }
+  res.status(200).json({
+    _id: user._id,
+    fullName: user.fullName,
+    userName: user.userName,
+    email: user.email,
+    bio: user.bio,
+    collegeName: user.collegeName,
+    followers: user.followers.length,
+    following: user.followings.length,
+  });
+});
 
 //friend-request
-export const sendFriendRequest=async(req: CustomRequest, res:Response)=>{
-    try{
-        const {receiverId}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const sender: any = await User.findById(req.user.id);
-        if (!sender){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const receiver: any = await User.findById(receiverId);
-        if (!receiver){
-            return res.status(401).json(new ApiError(401,"User not found"));
-        }
-        if (receiver.friendRequests.includes(sender.id)){
-            return res.status(400).json(new ApiError(400,"Friend request already sent"));
-        }
-        if (receiver.friends.includes(sender.id)){
-            return res.status(400).json(new ApiError(400,"Already friends"));
-        }
-        receiver.friendRequests.push(sender.id);
-        await receiver.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Friend request sent successfully", receiver))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to send friend request"))
-    }
-}
-export const acceptFriendRequest=async(req: CustomRequest, res:Response)=>{
-    try{
-        const {senderId}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const receiver: any = await User.findById(req.user.id);
-        if (!receiver){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const sender: any = await User.findById(senderId);
-        if (!sender){
-            return res.status(401).json(new ApiError(401,"User not found"));
-        }
-        if (!receiver.friendRequests.includes(sender.id)){
-            return res.status(400).json(new ApiError(400,"No friend request found"));
-        }
-        if (receiver.friends.includes(sender.id)){
-            return res.status(400).json(new ApiError(400,"Already friends"));
-        }
-        receiver.friends.push(sender.id);
-        sender.friends.push(receiver.id);
-        receiver.friendRequests=receiver.friendRequests.filter((id:any)=>id!==sender.id);
-        await receiver.save({validateBeforeSave:false});
-        await sender.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Friend request accepted successfully", receiver))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to accept friend request"))
-    }
-}
-export const declineFriendRequest=async(req: CustomRequest, res:Response)=>{
-    try{
-        const {senderId}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const receiver: any = await User.findById(req.user.id);
-        if (!receiver){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const sender: any = await User.findById(senderId);
-        if (!sender){
-            return res.status(401).json(new ApiError(401,"User not found"));
-        }
-        if (!receiver.friendRequests.includes(sender.id)){
-            return res.status(400).json(new ApiError(400,"No friend request found"));
-        }
-        receiver.friendRequests=receiver.friendRequests.filter((id:any)=>id!==sender.id);
-        await receiver.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Friend request declined successfully", receiver))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to decline friend request"))
-    }
-}
-export const blockFriend=async(req: CustomRequest, res:Response)=>{
-    try{
-        const {friendId}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const friend: any = await User.findById(friendId);
-        if (!friend){
-            return res.status(401).json(new ApiError(401,"User not found"));
-        }
-        if (user.blockedUsers.includes(friend.id)){
-            return res.status(400).json(new ApiError(400,"Already blocked"));
-        }
-        user.blockedUsers.push(friend.id);
-        await user.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Friend blocked successfully", user))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to block friend"))
-    }
-}
-export const unblockFriend=async(req: CustomRequest, res:Response)=>{
-    try{
-        const {friendId}=req.body;
-        if (!req.user) {
-            return res.status(401).json(new ApiError(401, "User not authorized"));
-        }
-        const user: any = await User.findById(req.user.id);
-        if (!user){
-            return res.status(401).json(new ApiError(401,"User not authorized"));
-        }
-        const friend: any = await User.findById(friendId);
-        if (!friend){
-            return res.status(401).json(new ApiError(401,"User not found"));
-        }
-        if (!user.blockedUsers.includes(friend.id)){
-            return res.status(400).json(new ApiError(400,"Not blocked"));
-        }
-        user.blockedUsers=user.blockedUsers.filter((id:any)=>id!==friend.id);
-        await user.save({validateBeforeSave:false});
-        res.status(200).json(new ApiResponse(200,"Friend unblocked successfully", user))
-    }catch(error){
-        res.status(400).json(new ApiError(400,"Failed to unblock friend"))
-    }
-}
+const followUser = asyncHandler(async (req: any, res: any) => {
+  const { userId } = req.params;
 
+  if (!req.user) {
+    throw new ApiError(401, "User not authorized");
+  }
+
+  const receiver = await User.findById(userId);
+  const sender = await User.findById(req.user._id);
+
+  if (!receiver || !sender) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (receiver.friendRequests.includes(sender._id)) {
+    throw new ApiError(400, "Friend request already sent");
+  }
+
+  receiver.friendRequests.push(sender._id);
+  await receiver.save({ validateBeforeSave: false });
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Friend request sent successfully", receiver));
+});
+const unfollowUser = asyncHandler(async (req: any, res: any) => {
+  const { userId } = req.params;
+
+  if (!req.user) {
+    throw new ApiError(401, "User not authorized");
+  }
+
+  const targetUser = await User.findById(userId);
+  const currentUser = await User.findById(req.user._id);
+
+  if (!targetUser || !currentUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Check if following
+  if (!currentUser.followings.includes(userId)) {
+    throw new ApiError(400, "Not following this user");
+  }
+
+  // Remove from following and followers
+  currentUser.followings = currentUser.followings.filter(
+    (id) => id.toString() !== userId,
+  );
+  targetUser.followers = targetUser.followers.filter(
+    (id) => id.toString() !== req.user!._id,
+  );
+
+  await Promise.all([currentUser.save(), targetUser.save()]);
+
+  res.status(200).json(
+    new ApiResponse(200, `Unfollowed ${targetUser.fullName}`, {
+      followers: targetUser.followers.length,
+      following: currentUser.followings.length,
+    }),
+  );
+});
+const acceptFriendRequest = asyncHandler(async (req: any, res: any) => {
+  const { senderId } = req.body;
+
+  if (!req.user) {
+    throw new ApiError(401, "User not authorized");
+  }
+
+  const receiver = await User.findById(req.user._id);
+  const sender = await User.findById(senderId);
+
+  if (!receiver || !sender) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (!receiver.friendRequests.includes(sender._id)) {
+    throw new ApiError(400, "No friend request found");
+  }
+
+  if (receiver.friends.includes(sender._id)) {
+    throw new ApiError(400, "Already friends");
+  }
+
+  // Add to friends list
+  receiver.friends.push(sender._id);
+  sender.friends.push(receiver._id);
+
+  // Add to followers and following (mutual follow)
+  receiver.followers.push(sender._id);
+  sender.followings.push(receiver._id);
+
+  // Remove friend request
+  receiver.friendRequests = receiver.friendRequests.filter(
+    (id) => id.toString() !== sender._id.toString(),
+  );
+
+  await Promise.all([
+    receiver.save({ validateBeforeSave: false }),
+    sender.save({ validateBeforeSave: false }),
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(200, "Friend request accepted successfully", {
+      _id: receiver._id,
+      fullName: receiver.fullName,
+      email: receiver.email,
+      collegeName: receiver.collegeName,
+      bio: receiver.bio,
+      followers: receiver.followers.length,
+      following: receiver.followings.length,
+    }),
+  );
+});
+const declineFriendRequest = async (req: any, res: any) => {
+  try {
+    const { senderId } = req.body;
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const receiver: any = await User.findById(req.user.id);
+    if (!receiver) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const sender: any = await User.findById(senderId);
+    if (!sender) {
+      return res.status(401).json(new ApiError(401, "User not found"));
+    }
+    if (!receiver.friendRequests.includes(sender.id)) {
+      return res.status(400).json(new ApiError(400, "No friend request found"));
+    }
+    receiver.friendRequests = receiver.friendRequests.filter(
+      (id: any) => id !== sender.id,
+    );
+    await receiver.save({ validateBeforeSave: false });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Friend request declined successfully", receiver),
+      );
+  } catch (error) {
+    res.status(400).json(new ApiError(400, "Failed to decline friend request"));
+  }
+};
+const blockFriend = async (req: any, res: any) => {
+  try {
+    const { friendId } = req.body;
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const user: any = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const friend: any = await User.findById(friendId);
+    if (!friend) {
+      return res.status(401).json(new ApiError(401, "User not found"));
+    }
+    if (user.blockedUsers.includes(friend.id)) {
+      return res.status(400).json(new ApiError(400, "Already blocked"));
+    }
+    user.blockedUsers.push(friend.id);
+    await user.save({ validateBeforeSave: false });
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Friend blocked successfully", user));
+  } catch (error) {
+    res.status(400).json(new ApiError(400, "Failed to block friend"));
+  }
+};
+const unblockFriend = async (req: any, res: any) => {
+  try {
+    const { friendId } = req.body;
+    if (!req.user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const user: any = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(401).json(new ApiError(401, "User not authorized"));
+    }
+    const friend: any = await User.findById(friendId);
+    if (!friend) {
+      return res.status(401).json(new ApiError(401, "User not found"));
+    }
+    if (!user.blockedUsers.includes(friend.id)) {
+      return res.status(400).json(new ApiError(400, "Not blocked"));
+    }
+    user.blockedUsers = user.blockedUsers.filter((id: any) => id !== friend.id);
+    await user.save({ validateBeforeSave: false });
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Friend unblocked successfully", user));
+  } catch (error) {
+    res.status(400).json(new ApiError(400, "Failed to unblock friend"));
+  }
+};
+
+//admins part
+const getAllUsers = asyncHandler(async (req: any, res: any) => {
+  try {
+    const users = await User.find({ isAdmin: false }).select("-password");
+    if (users.length === 0) {
+      res.status(404).json("No users found");
+    }
+    res.status(200).json({
+      count: users.length,
+      users: users,
+    });
+  } catch (error) {
+    res.status(500).json("Error fetching users");
+  }
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  acceptFriendRequest,
+  getProfileOfCurrentUser,
+  updateProfile,
+  seeProfileOfAnotherUser,
+  followUser,
+  unfollowUser,
+  getFollowers,
+  getFollowings,
+  getAllUsers,
+  blockFriend,
+};
