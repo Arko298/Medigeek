@@ -4,6 +4,7 @@ import ApiError from "../config/ApiError";
 import ApiResponse from "../config/ApiResponse";
 import asyncHandler from "../config/asynchandler.ts";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary";
+import mongoose from "mongoose";
 
 const createPost = asyncHandler(async (req: any, res: Response) => {
   const { title, description, content } = req.body;
@@ -16,21 +17,21 @@ const createPost = asyncHandler(async (req: any, res: Response) => {
     throw new ApiError(401, "Unauthorized");
   }
 
-  if (!req.file?.path) {
-    throw new ApiError(400, "Image file is required");
-  }
+  // if (!req.file?.path) {
+  //   throw new ApiError(400, "Image file is required");
+  // }
 
-  // Upload image to Cloudinary
-  const image = await uploadOnCloudinary(req.file.path);
-  if (!image?.url) {
-    throw new ApiError(500, "Failed to upload image");
-  }
+  // // Upload image to Cloudinary
+  // const image = await uploadOnCloudinary(req.file?.path);
+  // if (!image?.url) {
+  //   throw new ApiError(500, "Failed to upload image");
+  // }
 
   const post = await Post.create({
     title,
     description,
     content,
-    image: image.url,
+    // image: image?.url,
     author: req.user._id,
   });
 
@@ -164,12 +165,18 @@ const getPostsByUser = asyncHandler(async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
+  // Validate userId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
   const posts = await Post.find({ author: userId })
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .populate("author", "username avatar")
-    .populate("likes", "username");
+    .populate("author", "username fullName avatar")
+    .populate("likes", "username")
+    .populate("comments.user", "username avatar");
 
   const totalPosts = await Post.countDocuments({ author: userId });
 

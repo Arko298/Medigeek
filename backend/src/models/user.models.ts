@@ -56,6 +56,12 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // posts: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Post",
+    //   },
+    // ]
   },
   { timestamps: true,
    

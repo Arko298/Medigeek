@@ -29,7 +29,7 @@ router.get("/:id/comments", getPostComments); // Get comments for a post
 router.get("/search", searchPosts); // Search 
 
 // Protected routes (require authentication)
-router.post("/", authenticateToken, upload.single("image"), createPost); // Create post
+router.post("/", authenticateToken,  createPost); // Create post upload.single("image"),
 router.post("/:id/like", authenticateToken, toggleLikePost); // Like/unlike post
 router.post("/:id/comment", authenticateToken, addComment); // Add comment
 router.delete("/:id", authenticateToken, deletePost); // Delete post

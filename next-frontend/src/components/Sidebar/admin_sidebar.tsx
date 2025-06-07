@@ -27,14 +27,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
-  router: ReturnType<typeof useRouter>;
+ 
   isOpen: boolean;
 }
 
 {
   /* Defining the Sidebar component*/
 }
-const Sidebar: React.FC<SidebarProps> = ({ router, isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
   {
     /* Initializing state variables */
   }
@@ -51,7 +51,11 @@ const Sidebar: React.FC<SidebarProps> = ({ router, isOpen }) => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const isAdmin = userInfo?.isAdmin;
   const isLoggedIn = !!userInfo;
+  const router = useRouter();
 
+  {
+    /* Setting the initial active button based on the current route */
+  }
   {
     /* Handling button clicks and updating the active button state */
   }
