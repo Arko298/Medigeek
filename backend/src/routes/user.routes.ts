@@ -6,6 +6,7 @@ import {
   acceptFriendRequest,
   getProfileOfCurrentUser,
   updateProfile,
+  searchUser,
   followUser,
   unfollowUser,
   getFollowers,
@@ -31,6 +32,7 @@ router
 
 router.route("/profile/:userId").get(authenticateToken, seeProfileOfAnotherUser);
 
+router.route("/search").get(authenticateToken, searchUser);
 router
   .route("/friend-request/accept")
   .post(authenticateToken, acceptFriendRequest);

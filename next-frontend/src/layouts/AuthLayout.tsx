@@ -1,4 +1,4 @@
-
+// This is the Auth Layout 
 import { Inter } from "next/font/google";
 
 

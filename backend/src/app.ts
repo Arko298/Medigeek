@@ -30,10 +30,15 @@ app.use(bodyParser.urlencoded({extended: true}));
 //import of routes
 import userRoutes from "./routes/user.routes.ts"
 import postRoutes from "./routes/post.routes.ts"
+import jobRoutes from "./routes/jobs.routes.ts"
+import notificationRoutes from "./routes/notification.routes.ts"
 //routes
 // app.route('/api/healthcheck');
 app.use('/api/users',userRoutes)
 app.use('/api/posts',postRoutes)
+app.use('/api/jobs',jobRoutes)
+app.use('/api/notifications',notificationRoutes)
+
 
 
 

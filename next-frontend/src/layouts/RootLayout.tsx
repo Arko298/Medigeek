@@ -1,33 +1,68 @@
-import Header from "@/components/Header/header";
-import Image from "next/image";
-import { useRouter } from "next/router";
-import React, { useState } from "react";
-import { Inter } from "next/font/google";
-import Sidebar from "@/components/Sidebar/admin_sidebar";
-const inter = Inter({ subsets: ["latin"] });
+"use client"
+import type React from "react"
+import { useState, useEffect } from "react"
+import { ActiveButtonProvider } from "@/components/Sidebar/context/activeBtnContext"
+import Sidebar from "@/components/Sidebar/admin_sidebar"
+import Header from "@/components/Header/header"
+import { useRouter } from "next/router"
+import NotificationDropdown from "@/components/NotificationDropdown"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store"
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+interface RootLayoutProps {
+  children: React.ReactNode
+}
+
+const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { userInfo } = useSelector((state: RootState) => state.auth)
+
+  // Toggle sidebar state
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  return (
-    <div>
-      <div className="flex">
-        <div className="container mx-auto p-4">
-          {/* Render the Sidebar component */}
-          <Sidebar router={router} isOpen={isSidebarOpen} />
-          {/* Render the Header component */}
-          <Header isOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
+    setIsSidebarOpen(!isSidebarOpen)
+  }
 
-          {children}
+  // Set sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(true)
+      } else {
+        setIsSidebarOpen(false)
+      }
+    }
+
+    // Initial check
+    handleResize()
+
+    // Add event listener
+    window.addEventListener("resize", handleResize)
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
+  return (
+    
+    
+    <ActiveButtonProvider>
+      <div className="flex min-h-screen bg-gray-100">
+        <Sidebar  isOpen={isSidebarOpen} />
+        <div className="flex-1 flex flex-col">
+          <Header isOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
+           {userInfo && (
+              <div className="absolute top-2 right-20 z-20">
+                <NotificationDropdown />
+              </div>
+            )}
+          <main className="flex-1 p-4 mt-12">{children}</main>
         </div>
       </div>
-    </div>
-  );
+    </ActiveButtonProvider>
+    
+  )
 }
+
+export default RootLayout

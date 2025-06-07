@@ -4,6 +4,7 @@ import ApiResponse from "../config/ApiResponse.ts";
 import asyncHandler from "../config/asynchandler.ts";
 import bcrypt from "bcrypt";
 import createToken from "../config/createToken.ts";
+import Post from "../models/post.models.ts";
 
 // Avatar part should be done. It is currently not done.
 
@@ -81,6 +82,10 @@ const logoutUser = async (req: any, res: any) => {
 
 const getProfileOfCurrentUser = asyncHandler(async (req: any, res: any) => {
   const user = await User.findById(req.user._id);
+   const posts = await Post.find({ author: user?._id })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .select('title content createdAt likes comments');
 
   if (user) {
     res.status(200).json({
@@ -90,6 +95,11 @@ const getProfileOfCurrentUser = asyncHandler(async (req: any, res: any) => {
       email: user.email,
       bio: user.bio,
       collegeName: user.collegeName,
+      followers: user.followers.length,
+      following: user.followings.length,
+      posts_number: posts.length,
+      profilePicture: user.profilePicture || null,
+      posts:posts || [],
     });
   } else {
     res.status(404).json("User not found");
@@ -163,6 +173,10 @@ const seeProfileOfAnotherUser = asyncHandler(async (req: any, res: any) => {
   if (!user) {
     return res.status(404).json(new ApiError(404, "User not found"));
   }
+  const posts = await Post.find({ author: userId })
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .select('title content createdAt likes comments');
   res.status(200).json({
     _id: user._id,
     fullName: user.fullName,
@@ -172,8 +186,38 @@ const seeProfileOfAnotherUser = asyncHandler(async (req: any, res: any) => {
     collegeName: user.collegeName,
     followers: user.followers.length,
     following: user.followings.length,
+    posts: posts
   });
 });
+
+const searchUser = asyncHandler(async(req:any, res: any)=>{
+  const { query, page = 1, limit = 10 } = req.query;
+  if (!query) {
+    return res.status(400).json(new ApiError(400, "Query parameter is required"));
+  }
+
+  const regex = new RegExp(query, "i"); // Case-insensitive search
+  const users = await User.find({
+    $or: [
+      { fullName: regex },
+      { userName: regex },
+      { email: regex },
+      { collegeName: regex },
+    ],
+  })
+    .skip((page - 1) * limit)
+    .limit(Number(limit))
+    .select("-password -__v");
+
+  if (users.length === 0) {
+    return res.status(404).json(new ApiError(404, "No users found"));
+  }
+
+  res.status(200).json({
+    count: users.length,
+    users,
+  });
+})
 
 //friend-request
 const followUser = asyncHandler(async (req: any, res: any) => {
@@ -395,6 +439,7 @@ export {
   getProfileOfCurrentUser,
   updateProfile,
   seeProfileOfAnotherUser,
+  searchUser,
   followUser,
   unfollowUser,
   getFollowers,
