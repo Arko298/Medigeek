@@ -1,45 +1,55 @@
-#github actions for frontend
-
 name: Frontend CI
-on: 
+
+on:
   pull_request:
     paths:
-      -"/next-frontend/**"
+      - "next-frontend/**"
     types:
-     - opened
-     - synchronize
+      - opened
+      - synchronize
   push:
-    branches: ["main"]
-jobs:
-  frontend:
-    runs-on: ubuntu-latest
-    continue-on-error: false
-    env:
-      DEV_BUILD_DISABLED: false
-      FULL_BUILD_DISABLED: true
-      CUSTOM_CHECKS_DISABLED: true
-      CONFIGURE_DISABLED: false
-      CHECK_WORK_TREE_STATUS_DISABLED: true
+    branches:
+      - main
+    paths:
+      - "next-frontend/**"
 
+jobs:
+  ci:
+    runs-on: ubuntu-22.04
+    env:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:5000
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@v4
         with:
-          node-version: v18.17.0
+          node-version: 18.17.0
+          cache: "yarn"
+          cache-dependency-path: next-frontend/yarn.lock
 
-      - name: Install yarn
+      - name: Install Yarn
         run: npm install -g yarn
-      
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./next-frontend
 
-      - name: Run lint check
+      - name: Run lint
         run: yarn lint
         working-directory: ./next-frontend
 
+      - name: Run type-check
+        run: yarn type-check
+        working-directory: ./next-frontend
 
+      - name: Run tests
+        run: yarn test
+        working-directory: ./next-frontend
 
+      - name: Build
+        run: yarn build
+        working-directory: ./next-frontend
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
