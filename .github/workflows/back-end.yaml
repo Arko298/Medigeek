@@ -1,33 +1,58 @@
-#github actions for the backend
 name: Backend CI
+
 on:
   pull_request:
     paths:
-      - "/backend/**"
+      - "backend/**"
     types:
       - opened
       - synchronize
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
 
 jobs:
-  merge-backend:
+  ci:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@v4
         with:
-          node-version: v18.17.0
+          node-version: 18.17.0
+          cache: "yarn"
+          cache-dependency-path: backend/yarn.lock
 
-      - name: Install yarn
+      - name: Install Yarn
         run: npm install -g yarn
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         working-directory: ./backend
 
-      - name: Lint with yarn
+      - name: Run lint
         run: yarn lint
         working-directory: ./backend
+
+      - name: Run type-check
+        run: yarn type-check
+        working-directory: ./backend
+
+      - name: Set up MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+
+      - name: Run tests
+        run: yarn test
+        working-directory: ./backend
+        env:
+          MONGO_URI: mongodb://localhost:27017/test
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
