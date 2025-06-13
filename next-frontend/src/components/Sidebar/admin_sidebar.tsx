@@ -1,6 +1,3 @@
-{
-  /*Adding necessary imports from React and Next.js*/
-}
 import React, { useState, useEffect, useContext } from "react";
 import Image from "next/image";
 // import { useRouter } from 'next/router';
@@ -10,9 +7,6 @@ import { useRouter } from "next/router";
 
 import { ActiveButtonContext } from "./context/activeBtnContext";
 
-{
-  /* Importing image assets*/
-}
 import Home from "../../../public/Sidebar_Images/Home_Logo.png";
 import Chat from "../../../public/Sidebar_Images/Chat_Logo.png";
 import Settings from "../../../public/Sidebar_Images/Setings_Logo.png";
@@ -27,17 +21,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
- 
   isOpen: boolean;
 }
 
-{
-  /* Defining the Sidebar component*/
-}
-const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
-  {
-    /* Initializing state variables */
-  }
+const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const { activeButton, setActiveButton } = useContext(ActiveButtonContext);
   interface RootState {
     auth: {
@@ -70,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
     } else if (index === 3) {
       router.push("/courses");
     } else if (index === 4) {
-      router.push("/internship");
+      router.push("/jobs");
     } else if (index === 5) {
       router.push("/settings");
     } else if (index === 6) {
@@ -93,10 +80,9 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
         {/* Inner container for the sidebar content*/}
         <div className={styles.innerContainer}>
           {/* Hamburger button to toggle the sidebar */}
-
           {/* Dashboard section, with Business Icon and Search Bar*/}
-          <div className={styles.dashBoard}>
-            <div className={styles.webIcon}>
+          <div className={styles.dashBoard}> </div>
+          {/*<div className={styles.webIcon}>
               <Image src={WebIcon} alt="My Image" />
             </div>
             <button className={styles.searchButton}>
@@ -107,14 +93,15 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
                 width={20}
                 height={20}
               />
-              {/* Search input field */}
+              
               <input
                 type="text"
                 placeholder="Search"
                 className={styles.searchInput}
               />
             </button>
-          </div>
+          </div> */}{" "}
+          {/** This was looking bad because of the 2 icons and search-bar */}
           {/* Separator element*/}
           <span className={styles.separator}></span>
           {/* Navigation buttons container */}
@@ -184,7 +171,7 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
                 width={20}
                 height={20}
               />
-              <h2 className={styles.navDesc}>Internship</h2>
+              <h2 className={styles.navDesc}>Jobs</h2>
             </button>
             <button
               className={`${styles.navButton} ${activeButton === 5 ? styles.activeButton : ""}`}
@@ -199,19 +186,21 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
               />
               <h2 className={styles.navDesc}>Settings</h2>
             </button>
-            <button
-              className={`${styles.navButton} ${activeButton === 6 ? styles.activeButton : ""}`}
-              onClick={() => handleButtonClick(6)}
-            >
-              <Image
-                className={styles.navIcon}
-                src={AdminPanel}
-                alt="My Image"
-                width={20}
-                height={20}
-              />
-              <h2 className={styles.navDesc}>Admin Panel</h2>
-            </button>
+            {isAdmin && (
+              <button
+                className={`${styles.navButton} ${activeButton === 6 ? styles.activeButton : ""}`}
+                onClick={() => handleButtonClick(6)}
+              >
+                <Image
+                  className={styles.navIcon}
+                  src={AdminPanel}
+                  alt="My Image"
+                  width={20}
+                  height={20}
+                />
+                <h2 className={styles.navDesc}>Admin Panel</h2>
+              </button>
+            )}
             {/*Change the buttons accordingly in future*/}
           </div>
           {/* Profile section */}
@@ -221,7 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
           >
             <Image
               className={styles.profileIcon}
-              src={defaultProfle}
+              src={defaultProfle} // Profile Image should be here (Coming from backend).
               alt="My Image"
               width={50}
               height={50}
@@ -249,6 +238,5 @@ const Sidebar: React.FC<SidebarProps> = ({  isOpen }) => {
     // </div>
   );
 };
-
 
 export default Sidebar;

@@ -3,7 +3,6 @@ import Post from "../models/post.models";
 import ApiError from "../config/ApiError";
 import ApiResponse from "../config/ApiResponse";
 import asyncHandler from "../config/asynchandler.ts";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary";
 import mongoose from "mongoose";
 
 const createPost = asyncHandler(async (req: any, res: Response) => {
@@ -207,11 +206,7 @@ const deletePost = asyncHandler(async (req: any, res: Response) => {
     throw new ApiError(403, "Forbidden - You can only delete your own posts");
   }
 
-  // Extract public ID from Cloudinary URL for image deletion
-  const publicId = post.image.split("/").pop()?.split(".")[0];
-  if (publicId) {
-    await deleteFromCloudinary(publicId);
-  }
+ 
 
   await post.deleteOne();
 
@@ -239,27 +234,12 @@ const updatePost = asyncHandler(async (req: any, res: Response) => {
     throw new ApiError(403, "Forbidden - You can only update your own posts");
   }
 
-  let imageUrl = post.image;
-  if (req.file?.path) {
-    // Upload new image to Cloudinary
-    const image = await uploadOnCloudinary(req.file.path);
-    if (!image?.url) {
-      throw new ApiError(500, "Failed to upload image");
-    }
-
-    // Delete old image from Cloudinary
-    const publicId = post.image.split("/").pop()?.split(".")[0];
-    if (publicId) {
-      await deleteFromCloudinary(publicId);
-    }
-
-    imageUrl = image.url;
-  }
+  
 
   post.title = title;
   post.description = description;
   post.content = content;
-  post.image = imageUrl;
+ 
 
   const updatedPost = await post.save();
 

@@ -3,7 +3,7 @@ import {
   registerUser,
   loginUser,
   logoutUser,
-  acceptFriendRequest,
+  // acceptFriendRequest,
   getProfileOfCurrentUser,
   updateProfile,
   searchUser,
@@ -18,12 +18,15 @@ import {
   authenticateToken,
   authorizeAdmin,
 } from "../middlewares/auth.middlewares";
+import { apiLimiter, authLimiter } from "../config/rateLimit.ts";
 
 const router: Router = Router();
 
-router.route("/register").post(registerUser);
-router.post("/login", loginUser);
-router.post("/logout", logoutUser);
+router.use(apiLimiter);
+
+router.route("/register").post(authLimiter,registerUser);
+router.post("/login",authLimiter, loginUser);
+router.post("/logout",authLimiter, logoutUser);
 
 router
   .route("/profile")
@@ -33,9 +36,7 @@ router
 router.route("/profile/:userId").get(authenticateToken, seeProfileOfAnotherUser);
 
 router.route("/search").get(authenticateToken, searchUser);
-router
-  .route("/friend-request/accept")
-  .post(authenticateToken, acceptFriendRequest);
+
 router.route("/follow/:userId").post(authenticateToken, followUser);
 router.route("/unfollow/:userId").post(authenticateToken, unfollowUser);
 

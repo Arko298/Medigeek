@@ -11,6 +11,7 @@ export interface IPost extends Document {
   description: string;
   content: string;
   image: string;
+  imageKey?: string;
   author: mongoose.Schema.Types.ObjectId;
   likes: mongoose.Schema.Types.ObjectId[];
   comments: IComment[];
@@ -43,6 +44,11 @@ const postSchema: Schema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  imageKey: {
+    type: String,
+    required: false,
+    default: null
   },
   likes: [{
     type: Schema.Types.ObjectId,

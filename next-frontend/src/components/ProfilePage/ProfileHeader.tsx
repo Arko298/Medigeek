@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react"
-import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -17,6 +16,7 @@ import {
 import { UserPlus, UserMinus, UserX, Edit, Users } from "lucide-react"
 import FollowersModal from "./FollowersModal"
 import FollowingsModal from "./FollowingsModal"
+import ProfilePictureUpload from "./ProfilePictureUpload.tsx"
 
 interface ProfileHeaderProps {
   user: {
@@ -33,6 +33,7 @@ interface ProfileHeaderProps {
     hasSentFriendRequest?: boolean
     isBlocked?: boolean
   }
+ 
   isOwnProfile: boolean
 }
 
@@ -40,6 +41,7 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false)
   const [isFollowingsModalOpen, setIsFollowingsModalOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState(user.avatar || "")
   const [editForm, setEditForm] = useState({
     fullName: user.fullName,
     bio: user.bio || "",
@@ -85,6 +87,10 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
     } catch (error) {
       console.error("Failed to update profile:", error)
     }
+  }
+
+  const handlePictureUpdate = (newUrl: string) => {
+    setAvatarUrl(newUrl)
   }
 
   const getActionButton = () => {
@@ -184,13 +190,17 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
   return (
     <Card className="p-6">
       <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-        <Avatar className="h-32 w-32">
-          <img
-            src={user.avatar || "/placeholder-user.jpg"}
-            alt={user.fullName}
-            className="h-32 w-32 rounded-full object-cover"
-          />
-        </Avatar>
+        {isOwnProfile ? (
+          <ProfilePictureUpload currentAvatar={avatarUrl} userId={user._id} onPictureUpdate={handlePictureUpdate} />
+        ) : (
+          <div className="h-32 w-32">
+            <img
+              src={avatarUrl || "/placeholder-user.jpg"}
+              alt={user.fullName}
+              className="h-32 w-32 rounded-full object-cover border-4 border-background"
+            />
+          </div>
+        )}
 
         <div className="flex-1 text-center md:text-left">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
@@ -253,5 +263,3 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
 }
 
 export default ProfileHeader
-// This component displays the profile header with user information, action buttons, and modals for followers and following lists.
-// It allows users to edit their profile, follow/unfollow/block other users, and view followers and following lists in modals.

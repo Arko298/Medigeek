@@ -16,17 +16,19 @@ import {
   authorizeAdmin,
 } from "../middlewares/auth.middlewares.ts";
 import { upload } from "../middlewares/multer.middlewares.ts";
+import { apiLimiter } from "../config/rateLimit.ts";
 
 
 
 const router :Router = Router();
 
-// Public routes (no authentication)
-router.get("/", getPosts); // Get all 
-router.get("/:id", getPostById); // Get post by ID
-router.get("/user/:userId", getPostsByUser); // Get  by user
-router.get("/:id/comments", getPostComments); // Get comments for a post
-router.get("/search", searchPosts); // Search 
+router.use(apiLimiter);
+
+router.get("/",authenticateToken, getPosts); // Get all 
+router.get("/:id",authenticateToken, getPostById); // Get post by ID
+router.get("/user/:userId",authenticateToken, getPostsByUser); // Get  by user
+router.get("/:id/comments",authenticateToken, getPostComments); // Get comments for a post
+router.get("/search",authenticateToken, searchPosts); // Search 
 
 // Protected routes (require authentication)
 router.post("/", authenticateToken,  createPost); // Create post upload.single("image"),

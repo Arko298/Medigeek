@@ -21,18 +21,37 @@ const LandingMobileMenu: React.FC<MobileMenuProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close the menu when clicking outside
+  // Focus trap
   useEffect(() => {
-    if (!isMenuOpen) return;
+    if (!isMenuOpen || !menuRef.current) return;
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
+    const focusableElements = menuRef.current.querySelectorAll( 'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusableElement = focusableElements[0] as HTMLElement;
+    const lastFocusableElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+    const handleTabKey = (e: KeyboardEvent) =>{
+      if (e.key !== "Tab") return;
+
+      if (e.shiftKey) {
+        // Shift + Tab
+        if (document.activeElement === firstFocusableElement) {
+          e.preventDefault();
+          lastFocusableElement.focus();
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastFocusableElement) {
+          e.preventDefault();
+          firstFocusableElement.focus();
+        }
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    }
+     firstFocusableElement?.focus();
+    menuRef.current.addEventListener('keydown', handleTabKey);
+    
+  return () => {
+      menuRef.current.removeEventListener('keydown', handleTabKey);
     };
   }, [isMenuOpen]);
 
