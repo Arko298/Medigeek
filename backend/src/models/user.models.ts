@@ -31,6 +31,7 @@ const userSchema = new Schema(
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
+
         ref: "User",
       },
     ],
@@ -40,15 +41,20 @@ const userSchema = new Schema(
         ref: "User",
       },
     ],
-    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // From sendFriendRequest
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    BlockedUsers: [
+    // friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // From sendFriendRequest
+    // acceptedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    // friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    blockedUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
-    profilePicture: {
+    profilePictureKey: {
+      type: String,
+      default: null,
+    },
+    profilePicture:{
       type: String,
       default: null,
     },
@@ -56,12 +62,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    // posts: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Post",
-    //   },
-    // ]
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true,
    

@@ -54,7 +54,7 @@ export default function Post({ post }: PostProps) {
             <AvatarFallback>{post.author.name[0]}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold">{post.author.name}</p>
+            <p className="font-semibold text-sm text-black">{post.author.name}</p>
             <p className="text-sm text-gray-500">{post.timestamp}</p>
           </div>
         </div>

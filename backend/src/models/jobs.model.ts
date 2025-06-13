@@ -39,6 +39,10 @@ const jobSchema = new Schema(
       ref: "User",
       required: true,
     },
+    imageKey: {
+      type: String,
+      required: false,
+    },
     likes: [
       {
         type: Schema.Types.ObjectId,

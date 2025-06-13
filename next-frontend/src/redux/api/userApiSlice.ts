@@ -30,13 +30,44 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
-    getProfile: builder.query({
+     updateProfilePicture: builder.mutation({
+      query: (formData) => ({
+        url: `/api/images/profile/picture`,
+        method: "POST",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    deleteProfilePicture: builder.mutation({
+      query: () => ({
+        url: `/api/images/profile/picture`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getProfilePicture: builder.query({
+      query: (userId) => ({
+        url: `/api/images/profile/picture/${userId}`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, userId) => [{ type: "User", id: `picture-${userId}` }],
+    }),
+    getProfileOfCurrentUser: builder.query({
       query: () => ({
         url:`${USERS_URL}/profile`,
         method: "GET",
+        credentials: "include",
       }),
       providesTags: ["User"],
-    }),
+      transformResponse: (response) => {
+        // Transform the response to match the expected structure
+        return {
+          data: response,}
+          
+      }
+      },
+    ),
     getUserProfile: builder.query({
       query: (userId) => ({
         url: `${USERS_URL}/profile/${userId}`,
@@ -133,7 +164,7 @@ export const {
   useLoginUserMutation,
   useLogoutUserMutation,
   useUpdateProfileMutation,
-  useGetProfileQuery,
+  useGetProfileOfCurrentUserQuery,
   useGetUserProfileQuery,
   useGetAllUsersQuery,
   useSearchUsersQuery,
@@ -145,4 +176,7 @@ export const {
   useAcceptFriendRequestMutation,
   useDeclineFriendRequestMutation,
   useBlockUserMutation,
+  useUpdateProfilePictureMutation,
+  useDeleteProfilePictureMutation,
+  useGetProfilePictureQuery
 } = userApiSlice

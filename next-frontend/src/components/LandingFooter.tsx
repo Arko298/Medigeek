@@ -14,46 +14,43 @@ const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 
 const LandingFooter: React.FC = () => {
   return (
-    <footer className="w-full bg-black text-gray-300 py-10">
-      <div className="w-full px-4 mt-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          {/* Footer Column 1: Logo and About */}
-          <div className="footer-about max-w-md md:max-w-sm lg:max-w-md">
+    <footer className="w-full bg-gray-900 text-gray-300 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between gap-8">
+          {/* Logo and About */}
+          <div className="max-w-xs">
             <Image
               src="/LandingPage_Images/Logo.png"
               alt="Medigeek Logo"
-              height={50}
-              width={150}
+              width={160}
+              height={54}
               className="mb-4"
+              priority
             />
-            <p className="text-gray-400 break-words">
-              Medigeek is your go-to platform for connecting with peers, sharing
-              experiences, and finding the best job opportunities.
+            <p className="text-gray-400">
+              Medigeek is your go-to platform for connecting with peers...
             </p>
           </div>
 
-          {/* Footer Column 2: Newsletter */}
-          <div className="footer-newsletter mt-8 md:mt-0">
-            <h3 className="font-semibold text-lg mb-3">Newsletter</h3>
+          {/* Newsletter with improved contrast */}
+          <div className="max-w-xs">
+            <h3 className="font-semibold text-white text-lg mb-3">Newsletter</h3>
             <p className="text-gray-400 mb-4">
-              Subscribe to get the latest updates directly in your inbox.
+              Subscribe to get the latest updates...
             </p>
             <form onSubmit={handleNewsletterSubmit} className="flex">
-              <label htmlFor="email" className="sr-only">
-                Email Address
-              </label>{" "}
-              {/* Accessibility label */}
               <input
                 type="email"
                 name="email"
-                id="email"
+                aria-label="Email address for newsletter"
                 placeholder="Your email"
                 required
-                className="bg-white text-black rounded-l-md p-2 placeholder-gray-500"
+                className="bg-gray-700 text-white rounded-l-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-500"
               />
               <button
                 type="submit"
-                className="bg-red-600 text-white rounded-r-md p-2 hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 rounded-r-md transition-colors duration-200"
+                aria-label="Subscribe to newsletter"
               >
                 Subscribe
               </button>

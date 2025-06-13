@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo,useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
@@ -24,6 +24,18 @@ const navLinks: NavLink[] = [
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  //Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto"; // Reset on unmount
+    };
+  }, [isMenuOpen]);
 
   // Memoize Typewriter to prevent unnecessary re-renders
   const typewriterWords = useMemo(
@@ -50,9 +62,9 @@ const LandingPage = () => {
         <meta name="keywords" content="social media, undergraduates, jobs, communities, Medigeek" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex min-h-screen flex-col items-center relative">
+      <main className="flex min-h-screen flex-col items-center relative pt-16">
         {/* Navbar */}
-        <LandingNav />
+        <LandingNav isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}/>
 
         {/* Mobile Menu */}
         <LandingMobileMenu
@@ -64,7 +76,7 @@ const LandingPage = () => {
         {/* Header Section */}
         <section
           id="home"
-          className="relative flex w-full h-[80vh] md:h-screen flex-col md:flex-row max-w-[1400px] overflow-hidden"
+          className="relative flex w-full h-[calc(100vh-4rem)] flex-col md:h-screen  md:flex-row max-w-[1400px]"
           aria-label="Hero section"
         >
           {/* Background Image */}
