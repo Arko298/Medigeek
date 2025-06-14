@@ -211,3 +211,17 @@ p.copyright {
 .sidebar.open .hamburgerButton span:nth-child(3) {
   transform: rotate(-45deg) translate(3.5px, -3.5px);
 }
+
+@media (max-width: 880px) {
+  
+
+  .searchSpace {
+    display:none; /* Hide search space on screens 880px and narrower */
+    margin-right: 0; /* Reset margin if it was previously set */
+  }
+
+  /* Adjust the header's layout when logo and search are hidden */
+  
+
+  
+}

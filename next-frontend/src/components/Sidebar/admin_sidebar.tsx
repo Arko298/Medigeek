@@ -18,7 +18,7 @@ import defaultProfle from "../../../public/Sidebar_Images/Profile_Default.png";
 import WebIcon from "../../../public/Sidebar_Images/MediGeek_Logo.png";
 import AdminPanel from "../../../public/Sidebar_Images/Admin.png";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -39,6 +39,43 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const isAdmin = userInfo?.isAdmin;
   const isLoggedIn = !!userInfo;
   const router = useRouter();
+  const firstName = userInfo?.fullName?.split(' ')[0] || '';
+
+
+    useEffect(() => {
+    const currentPath = router.pathname;
+    let newActiveButtonIndex = 0; // Default to Home
+
+    // console.log("Sidebar useEffect: Current router.pathname:", currentPath); // Debugging
+    // console.log("Sidebar useEffect: Current activeButton from context:", activeButton); // Debugging
+
+    // Map paths to indices
+    if (currentPath === "/home") {
+      newActiveButtonIndex = 0;
+    } else if (currentPath === "/chat") {
+      newActiveButtonIndex = 1;
+    } else if (currentPath === "/community") {
+      newActiveButtonIndex = 2;
+    } else if (currentPath === "/courses") {
+      newActiveButtonIndex = 3;
+    } else if (currentPath === "/jobs") {
+      newActiveButtonIndex = 4;
+    } else if (currentPath === "/settings") {
+      newActiveButtonIndex = 5;
+    } else if (currentPath === "/admin") {
+      newActiveButtonIndex = 6;
+    } else if (currentPath === "/profile") {
+      newActiveButtonIndex = 7;
+    }
+
+    // Only update if the current path's calculated index is different from the context's
+    if (activeButton !== newActiveButtonIndex) {
+      // console.log(`Sidebar useEffect: Updating activeButton from ${activeButton} to ${newActiveButtonIndex}`); // Debugging
+      setActiveButton(newActiveButtonIndex);
+    } else {
+      // console.log("Sidebar useEffect: activeButton already matches current path, no update needed."); // Debugging
+    }
+  }, [router.pathname, setActiveButton]); // Re-run when router.pathname changes
 
   {
     /* Setting the initial active button based on the current route */
@@ -81,8 +118,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         <div className={styles.innerContainer}>
           {/* Hamburger button to toggle the sidebar */}
           {/* Dashboard section, with Business Icon and Search Bar*/}
-          <div className={styles.dashBoard}> </div>
-          {/*<div className={styles.webIcon}>
+          <div className={styles.dashBoard}>
+          <div className={styles.webIcon}>
               <Image src={WebIcon} alt="My Image" />
             </div>
             <button className={styles.searchButton}>
@@ -100,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                 className={styles.searchInput}
               />
             </button>
-          </div> */}{" "}
+          </div> 
           {/** This was looking bad because of the 2 icons and search-bar */}
           {/* Separator element*/}
           <span className={styles.separator}></span>
@@ -205,7 +242,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           </div>
           {/* Profile section */}
           <div
-            className={`${styles.profileSection} ${activeButton === 5 ? styles.activeButton : ""}`}
+            className={`${styles.profileSection} `}
             onClick={() => handleButtonClick(7)}
           >
             <Image
@@ -218,7 +255,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             {/* Renderig the name dynamically, appearing or disappearing based on the 'isOpen' prop*/}
             <h1 className={isOpen ? styles.appear : styles.disappear}>
               {/* Concatenating the greeting message with the first name*/}
-              {("Hey there, " + userInfo?.fullName)
+              {("Hey there, " + firstName)
                 .split("")
                 .map((letter, index) => (
                   // Creating a span element for each letter with a unique key
