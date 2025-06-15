@@ -124,13 +124,13 @@ const Header = ({ isOpen, onToggleSidebar }) => {
         )}
       </div>
       <div className={styles.iconsContainer}>
-        <Image
+        {/* <Image
           className={`${styles.icons} ${styles.info}`}
           src={Info || "/placeholder.svg"}
           alt="Info"
           width={20}
           height={20}
-        />
+        /> */}
         <Image
           className={`${styles.icons} ${styles.logOut}`}
           src={LogOut || "/placeholder.svg"}

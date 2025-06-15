@@ -23,26 +23,26 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   }
 
   // Set sidebar state based on screen size
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsSidebarOpen(true)
-      } else {
-        setIsSidebarOpen(false)
-      }
-    }
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     if (window.innerWidth >= 1024) {
+  //       setIsSidebarOpen(true)
+  //     } else {
+  //       setIsSidebarOpen(false)
+  //     }
+  //   }
 
     // Initial check
-    handleResize()
+    // handleResize()
 
-    // Add event listener
-    window.addEventListener("resize", handleResize)
+    // // Add event listener
+    // window.addEventListener("resize", handleResize)
 
-    // Clean up
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
+    // // Clean up
+    // return () => {
+    //   window.removeEventListener("resize", handleResize)
+    // }
+  // }, [])
 
   return (
     

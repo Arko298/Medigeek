@@ -16,7 +16,7 @@ const NotFound: React.FC = () => {
         We couldn't find the page you're looking for.
       </p>
       <button
-        onClick={() => (window.location.href = "/")} // Navigate home
+        onClick={() => (window.location.href = "/home")} // Navigate home
         className="mt-6 px-4 py-2 text-white bg-red-400 rounded-md shadow hover:bg-red-300"
       >
         Go Home

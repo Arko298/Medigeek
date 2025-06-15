@@ -18,7 +18,7 @@
   width: 82px; 
   /* padding: 20px; */
   position: fixed;
-  top: 0;
+  top: 20px;
   left: 0;
   transition: width 0.5s ease-in-out;
 }
@@ -35,7 +35,7 @@
  */
 .sidebarContent {
   /* display: flex; */
-  height: 100vh;
+  height: 98vh;
 }
 
 /**
@@ -316,4 +316,38 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/* --- Media Queries for screens below 880px --- */
+@media (max-width: 880px) {
+  .sidebar {
+    width: 0; /* Default width when closed on small screens */
+    left: -300px; /* Hide off-screen when closed */
+    /* Adjust this value if your open width is different */
+  }
+
+  .sidebar.open {
+    width: 300px; /* Full width when open on small screens */
+    left: 0; /* Bring it into view */
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4); /* Add shadow when open on mobile */
+  }
+}
+
+
+/* Hide dashboard and other elements when sidebar is in its "closed" state on larger screens */
+/* Or, for simplicity, hide it on large screens entirely as requested */
+@media (min-width: 881px) {
+    .dashBoard {
+        display: none; /* Hide dashboard when width is 881px or above */
+    }
+}
+/* Ensure it displays when sidebar is open on small screens */
+@media (max-width: 880px) {
+    .dashBoard {
+        display: none; /* Hidden by default on small screens */
+    }
+    .sidebar.open .dashBoard {
+        display: flex; /* Display only when sidebar is open */
+    }
 }
