@@ -1,3 +1,4 @@
+'use client'
 import Header from "@/components/Header/header";
 import Sidebar from "@/components/Sidebar/admin_sidebar"
 import { useRouter } from 'next/router';
@@ -81,7 +82,7 @@ const Admin=()=>{
     const datad={
         backgroundColor:[
             "rgb(2, 88, 255)",
-            "rgb(255, 151, 167)",
+            "rgb(203, 34, 147)",
             "rgb(255, 199, 0)",
             "rgb(32, 214, 255)",
         ],
@@ -92,7 +93,7 @@ const Admin=()=>{
             data:[300,200,100,50],
             backgroundColor:[
                 "rgb(2, 88, 255)",
-                "rgb(255, 151, 167)",
+                "rgb(203, 34, 147)",
                 "rgb(255, 199, 0)",
                 "rgb(32, 214, 255)",
             ],
@@ -121,39 +122,63 @@ const Admin=()=>{
 
     return <div className="max-h-svh h-svh overflow-hidden w-full flex">
         <div className="h-svh overflow-y-auto w-[330px] shrink-0 bg-red-100">
-            <Sidebar router={router} isOpen={isSidebarOpen}/>
+            <Sidebar isOpen={isSidebarOpen}/>
             <Header isOpen={isSidebarOpen} onToggleSidebar={toggleSidebar}/>
         </div>
         <div className="w-full h-svh overflow-y-auto  ">
-            <h1 className="mt-20 pl-20 font-medium underline">Admin Activity Dashboard</h1>
-            <div className="w-[90%] h-[40%] display:list-item m-10 sh shadow-2xl overflow-y-auto relative ">
-                
-                <table className="table-auto text-left">
-  <thead className="sticky top-0 left-0 bg-white">
-    <tr>
-      <th className="px-4">Admin Name</th>
-      <th className="px-4">Email Id</th>
-      <th className="px-4">Type Modified</th>
-      <th className="px-4">Date Modified</th>
-      <th className="px-4">Time of Login</th>
-    </tr>
-  </thead>
-  <tbody>
+            {/* <div>
+                <h1 className="mt-20 pl-20 font-medium underline">Admin Activity Dashboard</h1>
+                <div className="w-[90%] h-[40%] display:list-item m-10 sh shadow-2xl overflow-y-auto relative ">
+                    
+                    <table className="table-auto text-left">
+    <thead className="sticky top-0 left-0 bg-white">
+        <tr>
+        <th className="px-4">Admin Name</th>
+        <th className="px-4">Email Id</th>
+        <th className="px-4">Type Modified</th>
+        <th className="px-4">Date Modified</th>
+        <th className="px-4">Time of Login</th>
+        </tr>
+    </thead>
+    <tbody>
 
-    {
-        entries.map((item, index) => {
+        {
+            entries.map((item, index) => {
 
-            return  <tr key={index}>
-            <td className="px-4">{item.name}</td>
-            <td className="px-4">{item.email}</td>
-            <td className="px-4">{item.typeModified}</td>
-            <td className="px-4">{item.dateModified}</td>
-            <td className="px-4">{item.timeLogin}</td>
-          </tr>
-        })
-    }   
-  </tbody>
-</table>
+                return  <tr key={index}>
+                <td className="px-4">{item.name}</td>
+                <td className="px-4">{item.email}</td>
+                <td className="px-4">{item.typeModified}</td>
+                <td className="px-4">{item.dateModified}</td>
+                <td className="px-4">{item.timeLogin}</td>
+            </tr>
+            })
+        }   
+    </tbody>
+                    </table>
+                </div>
+            </div> */}
+            <div className="grid grid-cols-4 mt-16 px-10 gap-4">
+                <div className="p-6 shadow-2xl">
+                    <div className="h-2 w-8 bg-blue-500"></div>
+                    <p className="mt-1">Number of blogs</p>
+                    <h2 className="text-xl font-medium mt-2">52437</h2>
+                </div>
+                 <div className="p-6 shadow-2xl">
+                    <div className="h-2 w-8 bg-pink-500"></div>
+                    <p className="mt-1">Number of Articles</p>
+                    <h2 className="text-xl font-medium mt-2">33197</h2>
+                </div>
+                <div className="p-6 shadow-2xl">
+                    <div className="h-2 w-8 bg-yellow-500"></div>
+                    <p className="mt-1">New Accounts</p>
+                    <h2 className="text-xl font-medium mt-2">25543</h2>
+                </div>
+                <div className="p-6 shadow-2xl">
+                    <div className="h-2 w-8 bg-sky-500"></div>
+                    <p className="mt-1">Verified Users</p>
+                    <h2 className="text-xl font-medium mt-2">294</h2>
+                </div>
             </div>
             <div className="flex mt-10 pl-10 pr-10">
                 <div className="h-[240px] w-[50%] ml-10 shadow-2xl font-medium flex flex-col items-center justify-center"> 
