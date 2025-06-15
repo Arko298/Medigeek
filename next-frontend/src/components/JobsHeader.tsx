@@ -100,18 +100,18 @@ const JobsHeader = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="title" className="text-sm font-medium">
-                      Job Title *
+                      Designation *
                     </label>
                     <Input
                       id="title"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="e.g. Frontend Developer"
+                      placeholder="e.g. Doctor / Physician"
                       required
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <label htmlFor="company" className="text-sm font-medium">
                       Company *
                     </label>
@@ -122,7 +122,20 @@ const JobsHeader = () => {
                       placeholder="e.g. Acme Inc."
                       required
                     />
-                  </div>
+                  </div> */}
+                  <div className="space-y-2">
+                  <label htmlFor="organization" className="text-sm font-medium">
+                    Hospital / Clinic / Organization *
+                  </label>
+                 <Input
+                   id="organization"
+                  value={company} // or rename your state to organization if you want
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="e.g. City Hospital, Sunrise Clinic"
+                  required
+                  />
+              </div>
+
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
