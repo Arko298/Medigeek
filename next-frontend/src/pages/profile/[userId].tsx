@@ -16,9 +16,7 @@ const UserProfile = () => {
     data: profileData,
     isLoading,
     isError,
-  } = useGetUserProfileQuery(userId as string, {
-    skip: !userId,
-  })
+  } = useGetUserProfileQuery(userId as string)
 
   if (isLoading) {
     return (
@@ -30,7 +28,7 @@ const UserProfile = () => {
     )
   }
 
-  if (isError || !profileData) {
+  if (isError || !profileData.data.user) {
     return (
       <RootLayout>
         <div className="flex justify-center items-center min-h-screen">
@@ -41,10 +39,10 @@ const UserProfile = () => {
   }
 
   const user = {
-    ...profileData.data,
-    followers: profileData.data.followers?.length || 0,
-    following: profileData.data.following?.length || 0,
-    isFollowing: profileData.data.followers?.includes(userInfo?._id),
+    ...profileData?.data?.user,
+    followers: Array.isArray(profileData?.data?.user.followers)? profileData?.data?.user.followers?.length : 0,
+    followings: Array.isArray(profileData?.data?.user.following)? profileData?.data?.user.following?.length : 0,
+    isFollowing: profileData?.data?.user.followers?.includes(userInfo?._id),
   }
 
   const isOwnProfile = userInfo?._id === user._id

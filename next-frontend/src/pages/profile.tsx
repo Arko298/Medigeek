@@ -9,15 +9,13 @@ import UserPosts from "@/components/ProfilePage/UserPost"
 const Profile = () => {
   const { userInfo } = useSelector((state: RootState) => state.auth)
   const {
-    data: apiResponse,
+    data : apiUserInfo,
     isLoading,
     isError,
     error,
   } = 
   
-   useGetProfileOfCurrentUserQuery(undefined, {
-    skip: !userInfo,
-  })
+   useGetProfileOfCurrentUserQuery("")
 
   if (isLoading) {
     return (
@@ -40,7 +38,7 @@ const Profile = () => {
     )
   }
 
-  if (!apiResponse?.data || !userInfo) {
+  if ( !apiUserInfo ||  !userInfo) {
     return (
       <RootLayout>
         <div className="flex justify-center items-center min-h-screen">
@@ -51,23 +49,26 @@ const Profile = () => {
   }
 
   // Extract user data from API response
-  const userData = apiResponse.data
+  const userData = apiUserInfo?.data?.data
+  console.log("User Data:", userData.data)
 
   // Safely transform data for ProfileHeader
   const profileHeaderData = {
-    _id: userData._id,
-    fullName: userData.fullName || "Unknown User",
-    userName: userData.userName || "unknown",
-    email: userData.email || "",
-    bio: userData.bio || "",
-    avatar: userData.profilePicture || "", // Use the profilePicture from API
-    collegeName: userData.collegeName || "Not specified",
-    followers: userData.followers || 0,
-    following: userData.followings || 0,
+    _id: userData.data._id,
+    fullName: userData.data.fullName || "Unknown User",
+    userName: userData.data.userName || "unknown",
+    bio: userData.data.bio || "",
+    email: userData.data.email || "Not provided",
+    isVerified: userData.data.isVerified || false,
+    avatar: userData.data.profilePicture || "", // Use the profilePicture from API
+    collegeName: userData.data.collegeName || "Not specified",
+    followers: Array.isArray(userData.data.followers) ? userData.data.followers.length : 0,
+    followings: Array.isArray(userData.data.followings) ? userData.data.following.length : 0,
     isFollowing: false, // Not relevant for own profile
     hasSentFriendRequest: false, // Not relevant for own profile
     isBlocked: false, // Not relevant for own profile
   }
+  console.log("Profile Header Data:", profileHeaderData)
 
   return (
     <RootLayout>

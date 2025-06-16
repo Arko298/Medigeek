@@ -57,7 +57,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url:`${USERS_URL}/profile`,
         method: "GET",
-        credentials: "include",
+        
       }),
       providesTags: ["User"],
       transformResponse: (response) => {
@@ -72,6 +72,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: (userId) => ({
         url: `${USERS_URL}/profile/${userId}`,
         method: "GET",
+        
       }),
       providesTags: (_result, _error, userId) => [{ type: "User", id: userId }],
     }),
@@ -90,26 +91,20 @@ export const userApiSlice = apiSlice.injectEndpoints({
       providesTags: ["User"],
     }),
     getFollowers: builder.query({
-      query: ({ userName, page = 1, limit = 10 }) => ({
-        url: `${USERS_URL}/followers/${userName}?page=${page}&limit=${limit}`,
+      query: ({ fullName, page = 1, limit = 10 }) => ({
+        url: `${USERS_URL}/followers?page=${page}&limit=${limit}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, { userName }) => [{ type: "User", id: `followers-${userName}` }],
+      providesTags: (_result, _error, { fullName }) => [{ type: "User", id: `followers-${fullName}` }],
     }),
     getFollowings: builder.query({
-      query: ({ userName, page = 1, limit = 10 }) => ({
-        url: `${USERS_URL}/following/${userName}?page=${page}&limit=${limit}`,
+      query: ({ fullName, page = 1, limit = 10 }) => ({
+        url: `${USERS_URL}/followings?page=${page}&limit=${limit}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, { userName }) => [{ type: "User", id: `following-${userName}` }],
+      providesTags: (_result, _error, { fullName }) => [{ type: "User", id: `following-${fullName}` }],
     }),
-    getFriendRequests: builder.query({
-      query: () => ({
-        url: `${USERS_URL}/friend-requests`,
-        method: "GET",
-      }),
-      providesTags: ["User"],
-    }),
+
     followUser: builder.mutation({
       query: (userId) => ({
         url: `${USERS_URL}/follow/${userId}`,
@@ -132,22 +127,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         { type: "User", id: "LIST" },
       ],
     }),
-    acceptFriendRequest: builder.mutation({
-      query: (senderId) => ({
-        url: `${USERS_URL}/friend-request/accept`,
-        method: "POST",
-        body: { senderId },
-      }),
-      invalidatesTags: ["User"],
-    }),
-    declineFriendRequest: builder.mutation({
-      query: (senderId) => ({
-        url: `${USERS_URL}/friend-request/decline`,
-        method: "POST",
-        body: { senderId },
-      }),
-      invalidatesTags: ["User"],
-    }),
+    
     blockUser: builder.mutation({
       query: (userId) => ({
         url: `${USERS_URL}/block`,
@@ -170,11 +150,8 @@ export const {
   useSearchUsersQuery,
   useGetFollowersQuery,
   useGetFollowingsQuery,
-  useGetFriendRequestsQuery,
   useFollowUserMutation,
   useUnfollowUserMutation,
-  useAcceptFriendRequestMutation,
-  useDeclineFriendRequestMutation,
   useBlockUserMutation,
   useUpdateProfilePictureMutation,
   useDeleteProfilePictureMutation,

@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import ApiError from "../../config/ApiError";
 import ApiResponse from "../../config/ApiResponse";
 import asyncHandler from "../../config/asynchandler";
@@ -16,6 +17,9 @@ const uploadPostImage = asyncHandler(async (req: any, res:any) => {
   }
 
   const post = await Post.findById(postId);
+  if (!isValidObjectId(postId)){
+    throw new ApiError(400, "Invalid post ID format");
+  }
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
