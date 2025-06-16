@@ -11,7 +11,6 @@ import {
   useMarkAllAsReadMutation,
   useDeleteNotificationMutation,
 } from "@/redux/api/notificationApiSlice"
-import { useAcceptFriendRequestMutation, useDeclineFriendRequestMutation } from "@/redux/api/userApiSlice"
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -19,9 +18,7 @@ const NotificationDropdown = () => {
   const [markAsRead] = useMarkAsReadMutation()
   const [markAllAsRead] = useMarkAllAsReadMutation()
   const [deleteNotification] = useDeleteNotificationMutation()
-  const [acceptFriendRequest] = useAcceptFriendRequestMutation()
-  const [declineFriendRequest] = useDeclineFriendRequestMutation()
-
+  
   const notifications = notificationsData?.data?.notifications || []
   const unreadCount = notificationsData?.data?.unreadCount || 0
 
@@ -49,23 +46,7 @@ const NotificationDropdown = () => {
     }
   }
 
-  const handleAcceptFriendRequest = async (senderId: string, notificationId: string) => {
-    try {
-      await acceptFriendRequest(senderId).unwrap()
-      await handleDelete(notificationId)
-    } catch (error) {
-      console.error("Failed to accept friend request:", error)
-    }
-  }
-
-  const handleDeclineFriendRequest = async (senderId: string, notificationId: string) => {
-    try {
-      await declineFriendRequest(senderId).unwrap()
-      await handleDelete(notificationId)
-    } catch (error) {
-      console.error("Failed to decline friend request:", error)
-    }
-  }
+ 
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString)
@@ -148,14 +129,14 @@ const NotificationDropdown = () => {
                       <div className="flex space-x-2 mt-2">
                         <Button
                           size="sm"
-                          onClick={() => handleAcceptFriendRequest(notification.sender._id, notification._id)}
+                         
                         >
                           Accept
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeclineFriendRequest(notification.sender._id, notification._id)}
+                          
                         >
                           Decline
                         </Button>

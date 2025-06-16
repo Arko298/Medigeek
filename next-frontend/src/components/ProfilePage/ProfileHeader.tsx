@@ -17,6 +17,7 @@ import { UserPlus, UserMinus, UserX, Edit, Users } from "lucide-react"
 import FollowersModal from "./FollowersModal"
 import FollowingsModal from "./FollowingsModal"
 import ProfilePictureUpload from "./ProfilePictureUpload.tsx"
+import Image from "next/image"
 
 interface ProfileHeaderProps {
   user: {
@@ -28,7 +29,7 @@ interface ProfileHeaderProps {
     avatar?: string
     collegeName: string
     followers: number
-    following: number
+    followings: number
     isFollowing?: boolean
     hasSentFriendRequest?: boolean
     isBlocked?: boolean
@@ -53,6 +54,8 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
   const [unfollowUser] = useUnfollowUserMutation()
   const [blockUser] = useBlockUserMutation()
   const [updateProfile] = useUpdateProfileMutation()
+
+  console.log("ProfileHeader received user:", user);
 
   const handleFollow = async () => {
     try {
@@ -194,10 +197,12 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
           <ProfilePictureUpload currentAvatar={avatarUrl} userId={user._id} onPictureUpdate={handlePictureUpdate} />
         ) : (
           <div className="h-32 w-32">
-            <img
-              src={avatarUrl || "/placeholder-user.jpg"}
+            <Image
+              src={avatarUrl || "/avatar.svg"}
               alt={user.fullName}
               className="h-32 w-32 rounded-full object-cover border-4 border-background"
+              width={128}
+              height={128}
             />
           </div>
         )}
@@ -227,7 +232,7 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
               onClick={() => setIsFollowingsModalOpen(true)}
               className="text-center hover:bg-gray-100 p-2 rounded-md transition-colors"
             >
-              <div className="font-bold text-xl">{user.following}</div>
+              <div className="font-bold text-xl">{user.followings}</div>
               <div className="text-gray-600 text-sm flex items-center">
                 <Users className="h-4 w-4 mr-1" />
                 Following
@@ -248,7 +253,7 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
         isOpen={isFollowersModalOpen}
         onClose={() => setIsFollowersModalOpen(false)}
         userId={user._id}
-        userName={user.userName}
+        fullName={user.fullName}
       />
 
       {/* Followings Modal */}
@@ -256,7 +261,7 @@ const ProfileHeader = ({ user, isOwnProfile }: ProfileHeaderProps) => {
         isOpen={isFollowingsModalOpen}
         onClose={() => setIsFollowingsModalOpen(false)}
         userId={user._id}
-        userName={user.userName}
+        fullName={user.fullName}
       />
     </Card>
   )

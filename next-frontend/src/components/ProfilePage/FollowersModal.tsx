@@ -15,17 +15,17 @@ interface FollowersModalProps {
   isOpen: boolean
   onClose: () => void
   userId: string
-  userName: string
+  fullName: string
 }
 
-const FollowersModal = ({ isOpen, onClose, userId, userName }: FollowersModalProps) => {
+const FollowersModal = ({ isOpen, onClose, userId, fullName }: FollowersModalProps) => {
   const router = useRouter()
   const [page, setPage] = useState(1)
   const {
     data: followersData,
     isLoading,
     isFetching,
-  } = useGetFollowersQuery({ userName, page, limit: 10 }, { skip: !isOpen })
+  } = useGetFollowersQuery({ fullName, page, limit: 10 }, { skip: !isOpen })
   const [followUser, { isLoading: isFollowing }] = useFollowUserMutation()
   const [unfollowUser, { isLoading: isUnfollowing }] = useUnfollowUserMutation()
   const { userInfo } = useSelector((state: RootState) => state.auth)
